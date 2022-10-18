@@ -1,5 +1,8 @@
 package com.example.dividend;
 
+import com.example.dividend.model.Company;
+import com.example.dividend.model.ScrapedResult;
+import com.example.dividend.scraper.YahooFinanceScraper;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,37 +20,10 @@ public class DividendApplication {
     public static void main(String[] args) {
 //        SpringApplication.run(DividendApplication.class, args);
 
-        try {
-            Connection connection = Jsoup.connect("https://finance.yahoo.com/quote/O/history?period1=1633967072&period2=1665503072&interval=1mo&filter=history&frequency=1mo&includeAdjustedClose=true");
-            // 파싱 Document
-            Document document = connection.get();
+        YahooFinanceScraper scraper = new YahooFinanceScraper();
+        var result  = scraper.scrap(Company.builder().ticker("0").build());
+        System.out.println(result);
 
-            Elements eles = document.getElementsByAttributeValue("data-test", "historical-prices");
-            // table 전체
-            Element ele = eles.get(0);
-
-            Element tbody = ele.children().get(1);
-            for (Element e : tbody.children()) {
-                String txt = e.text();
-                if (!txt.endsWith("Dividend")) {
-                    continue;
-                }
-
-                String[] splits = txt.split(" ");
-                String month = splits[0];
-                int day = Integer.valueOf(splits[1].replace(",", ""));
-                int year = Integer.valueOf(splits[2]);
-                String dividend = splits[3];
-
-                System.out.println(year + "/" + month + "/" + day + " -> " + dividend);
-
-            }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
-
 
 }
